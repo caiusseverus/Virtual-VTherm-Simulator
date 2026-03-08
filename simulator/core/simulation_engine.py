@@ -40,6 +40,10 @@ class SimulationEngine:
         self.thermostat = ThermostatAdapter(
             target_temperature=scenario.thermostat.target_temp,
             hysteresis=scenario.thermostat.hysteresis,
+            mode=scenario.thermostat.mode,
+            integration_module_path=scenario.thermostat.integration_module_path,
+            integration_revision=scenario.thermostat.integration_revision,
+            ha_runtime=self.ha,
         )
         self.building = BuildingModel(
             indoor_temperature=scenario.building.initial_indoor_temp,
@@ -71,7 +75,11 @@ class SimulationEngine:
             outdoor = self.weather.get_temperature(now_s)
 
             self.scheduler.run_due(now_s)
-            self.thermostat.update(self.building.indoor_temperature)
+            self.thermostat.update(
+                self.building.indoor_temperature,
+                outdoor_temperature=outdoor,
+                time_s=now_s,
+            )
             heating_command = self.thermostat.get_heating_command()
             power_w = self.heat_source.output_power_w(heating_command)
             indoor = self.building.step(step_s, outdoor, power_w, solar_gain_w, internal_gain_w)
