@@ -22,6 +22,15 @@ class MiniDataFrame:
 
 
 @dataclass
+class MetricsSummary:
+    temperature_tracking_error: float
+    heating_duty_cycle: float
+    overshoot_degrees: float
+    energy_usage_kwh: float
+    comfort_violation_time_hours: float
+
+
+@dataclass
 class MetricsRecorder:
     """Accumulates timestep metrics and exports CSV."""
 
@@ -50,6 +59,9 @@ class MetricsRecorder:
     def to_dataframe(self) -> MiniDataFrame:
         return MiniDataFrame(self._rows)
 
+    def summarize(self, step_seconds: float) -> MetricsSummary:
+        return summarize(self._rows, step_seconds)
+
     def save_csv(self, path: str | Path) -> Path:
         output = Path(path)
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -61,3 +73,26 @@ class MetricsRecorder:
             writer.writeheader()
             writer.writerows(self._rows)
         return output
+
+
+def summarize(rows: list[dict[str, Any]], step_seconds: float) -> MetricsSummary:
+    if not rows:
+        raise ValueError("Cannot summarize empty rows")
+
+    abs_errors = [abs(float(r["indoor_temperature"]) - float(r["target_temperature"])) for r in rows]
+    mean_error = sum(abs_errors) / len(abs_errors)
+
+    heating_values = [float(r["heating_output"]) for r in rows]
+    duty_cycle = sum(1.0 for value in heating_values if value > 0.0) / len(heating_values)
+
+    overshoot = max(max(float(r["indoor_temperature"]) - float(r["target_temperature"]), 0.0) for r in rows)
+    energy_kwh = float(rows[-1]["energy_consumption"])
+    violation_hours = sum(1 for e in abs_errors if e > 0.5) * step_seconds / 3600.0
+
+    return MetricsSummary(
+        temperature_tracking_error=mean_error,
+        heating_duty_cycle=duty_cycle,
+        overshoot_degrees=overshoot,
+        energy_usage_kwh=energy_kwh,
+        comfort_violation_time_hours=violation_hours,
+    )

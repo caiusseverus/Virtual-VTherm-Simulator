@@ -1,20 +1,17 @@
-"""Simulation time helpers."""
+"""Deprecated legacy clock shim."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
+import warnings
 
+from simulator.core.time_controller import TimeController
 
-@dataclass
-class SimulationClock:
-    """Controllable simulation clock for deterministic, discrete stepping."""
+warnings.warn(
+    "sim.clock is deprecated; use simulator.core.time_controller",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-    current: datetime
+SimulationClock = TimeController
 
-    def now(self) -> datetime:
-        return self.current
-
-    def advance(self, dt: timedelta) -> datetime:
-        self.current += dt
-        return self.current
+__all__ = ["SimulationClock"]
