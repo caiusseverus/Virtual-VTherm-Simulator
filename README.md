@@ -1,4 +1,4 @@
-# Virtual VTherm Simulator
+# Thermostat Offline Simulator
 
 Standalone Python framework for high-speed Home Assistant heating controller simulation.
 
@@ -13,6 +13,7 @@ Standalone Python framework for high-speed Home Assistant heating controller sim
 
 ## Quick start
 
+## Install
 ```bash
 python run_sim.py --scenario scenarios/winter_day.yaml --output results/run_001/simulation.csv --plot
 ```
@@ -32,6 +33,7 @@ results/run_001/
 python -m web.app
 # open http://localhost:8000
 ```
+Open http://localhost:8000
 
 ## Scenario format (YAML)
 

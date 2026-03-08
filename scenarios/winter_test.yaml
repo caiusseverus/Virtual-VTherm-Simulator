@@ -1,0 +1,15 @@
+name: winter_test
+simulation:
+  duration_hours: 48
+  step_seconds: 10
+building:
+  initial_indoor_temp: 18
+  thermal_mass: 150000
+  heat_loss: 220
+weather:
+  outdoor_temp: 5
+heating:
+  max_power_kw: 10
+thermostat:
+  target_temp: 20
+  hysteresis: 0.2

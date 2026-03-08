@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermostat Simulator</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Thermostat Simulation</h1>
+    <div class="grid">
+      <label>Duration (hours) <input id="duration" type="number" value="48"></label>
+      <label>Step (seconds) <input id="step" type="number" value="10"></label>
+      <label>Thermal mass (J/K) <input id="mass" type="number" value="150000"></label>
+      <label>Heat loss (W/K) <input id="loss" type="number" value="220"></label>
+      <label>Boiler power (kW) <input id="power" type="number" value="10"></label>
+      <label>Target temp (°C) <input id="target" type="number" value="20"></label>
+      <label>Outdoor temp (°C) <input id="outdoor" type="number" value="5"></label>
+      <label>Initial indoor temp (°C) <input id="initial" type="number" value="18"></label>
+      <label>Hysteresis (°C) <input id="hysteresis" type="number" step="0.1" value="0.2"></label>
+    </div>
+    <button id="runBtn">Run Simulation</button>
+    <p id="status"></p>
+    <canvas id="tempChart"></canvas>
+    <canvas id="heatChart"></canvas>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
