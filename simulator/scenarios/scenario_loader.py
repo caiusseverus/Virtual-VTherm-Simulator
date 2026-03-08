@@ -80,6 +80,9 @@ def _to_nested_schema(raw: dict[str, Any]) -> dict[str, Any]:
             "thermostat": {
                 "target_temp": _to_float(raw.get("thermostat", {}), "target_temp", 21.0),
                 "hysteresis": _to_float(raw.get("thermostat", {}), "hysteresis", 0.2),
+                "mode": str(raw.get("thermostat", {}).get("mode", "mock_thermostat")),
+                "integration_module_path": raw.get("thermostat", {}).get("integration_module_path"),
+                "integration_revision": raw.get("thermostat", {}).get("integration_revision"),
             },
             "gains": {
                 "solar_gain_kw": _to_float(raw.get("gains", {}), "solar_gain_kw", 0.0),
@@ -109,6 +112,9 @@ def _to_nested_schema(raw: dict[str, Any]) -> dict[str, Any]:
         "thermostat": {
             "target_temp": _to_float(raw, "target_temp_c", 21.0),
             "hysteresis": _to_float(raw, "hysteresis", 0.2),
+            "mode": str(raw.get("thermostat_mode", "mock_thermostat")),
+            "integration_module_path": raw.get("integration_module_path"),
+            "integration_revision": raw.get("integration_revision"),
         },
         "gains": {
             "solar_gain_kw": _to_float(raw, "solar_gain_kw", 0.0),

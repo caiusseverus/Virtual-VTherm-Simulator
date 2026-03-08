@@ -34,6 +34,9 @@ class HeatingConfig:
 class ThermostatConfig:
     target_temp: float
     hysteresis: float = 0.2
+    mode: str = "mock_thermostat"
+    integration_module_path: str | None = None
+    integration_revision: str | None = None
 
 
 @dataclass
