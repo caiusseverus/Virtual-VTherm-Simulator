@@ -1,37 +1,77 @@
 # Thermostat Offline Simulator
 
-Fast offline simulation framework for testing thermostat control algorithms against a thermal building model without Home Assistant runtime.
+Standalone Python framework for high-speed Home Assistant heating controller simulation.
 
-## Features
-- Deterministic virtual-time simulation loop (no sleeps)
-- Thermal building model + heat source + thermostat adapter
-- YAML-driven scenarios
-- CSV metrics and PNG graphs
-- FastAPI web UI to run simulations interactively
-- Pytest coverage for core pieces
+## Highlights
+
+- Deterministic discrete-time simulation loop (no realtime waits).
+- Fake Home Assistant runtime (`states`, `services`, `config`, and controllable time).
+- Thermal model adapter with configurable heat capacity, losses, gains, and heater power.
+- Thermostat adapter interface (`update` + `compute_heating_command`).
+- Metrics + graph generation (`metrics.json` + SVG chart output).
+- Simple browser UI for parameter editing and one-click simulation runs.
+
+## Quick start
 
 ## Install
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+python run_sim.py --scenario scenarios/winter_day.yaml --output results/run_001/simulation.csv --plot
 ```
 
-## CLI usage
-```bash
-python run_simulation.py scenarios/winter_test.yaml
+Outputs:
+
+```text
+results/run_001/
+  simulation.csv
+  metrics.json
+  temperature.svg
 ```
 
-## Web UI
+## Run the web UI
+
 ```bash
-python -m uvicorn simulator.web.server:app --reload
+python -m web.app
+# open http://localhost:8000
 ```
 Open http://localhost:8000
 
-## API
-- `GET /scenarios`
-- `POST /simulate`
-- `GET /results/{id}`
+## Scenario format (YAML)
 
-## Performance target
-Default scenario (`48h`, `10s` step) is designed to run far faster than real-time (typically >100x speedup on modern CPUs).
+Nested format supported:
+
+```yaml
+name: baseline
+start_time: "2025-01-01T00:00:00"
+simulation:
+  duration_hours: 72
+  timestep_seconds: 60
+  initial_indoor_temp: 19
+building:
+  heat_capacity: 30000000
+  heat_loss_coefficient: 200
+heating:
+  max_power_kw: 12
+weather:
+  outdoor_base_c: 5
+  outdoor_amplitude_c: 4
+thermostat:
+  target_temperature: 21
+gains:
+  solar_gain_kw: 0.0
+  internal_heat_gain_kw: 0.5
+```
+
+Flat legacy scenarios remain supported.
+
+## Project layout
+
+```text
+analysis/          # CSV recording
+fake_ha/           # Fake Home Assistant primitives
+sim/               # Engine + scenario + metrics
+thermal_model/     # Thermal model adapter interface
+thermostat/        # Thermostat adapter interface
+visualization/     # Graph generation
+web/               # Lightweight web UI
+experiments/       # Experiment entrypoints
+```

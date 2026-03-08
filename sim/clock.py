@@ -1,4 +1,4 @@
-"""Simulation clock helper."""
+"""Simulation time helpers."""
 
 from __future__ import annotations
 
@@ -8,11 +8,13 @@ from datetime import datetime, timedelta
 
 @dataclass
 class SimulationClock:
-    """Discrete clock used by the engine."""
+    """Controllable simulation clock for deterministic, discrete stepping."""
 
     current: datetime
-    step: timedelta
 
-    def tick(self) -> datetime:
-        self.current += self.step
+    def now(self) -> datetime:
+        return self.current
+
+    def advance(self, dt: timedelta) -> datetime:
+        self.current += dt
         return self.current
