@@ -1,6 +1,6 @@
 """Convenience script for simulation experiments."""
 
-from run_sim import main
+from run_simulation import main
 
 
 if __name__ == "__main__":

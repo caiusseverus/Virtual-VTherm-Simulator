@@ -2,76 +2,71 @@
 
 Standalone Python framework for high-speed Home Assistant heating controller simulation.
 
-## Highlights
+## Canonical stack
 
-- Deterministic discrete-time simulation loop (no realtime waits).
-- Fake Home Assistant runtime (`states`, `services`, `config`, and controllable time).
-- Thermal model adapter with configurable heat capacity, losses, gains, and heater power.
-- Thermostat adapter interface (`update` + `compute_heating_command`).
-- Metrics + graph generation (`metrics.json` + SVG chart output).
-- Simple browser UI for parameter editing and one-click simulation runs.
+The canonical implementation lives under `simulator/*`.
+Legacy modules (`sim/*`, `web/app.py`, `run_sim.py`) are kept only as deprecation shims.
 
 ## Quick start
 
-## Install
 ```bash
-python run_sim.py --scenario scenarios/winter_day.yaml --output results/run_001/simulation.csv --plot
+python run_simulation.py scenarios/winter_test.yaml --output simulator/results/cli_run
 ```
 
 Outputs:
 
 ```text
-results/run_001/
-  simulation.csv
-  metrics.json
-  temperature.svg
+simulator/results/cli_run/
+  metrics.csv
+  temperature_vs_target.png
+  heating_output.png
+  energy_usage.png
 ```
 
 ## Run the web UI
 
 ```bash
-python -m web.app
+uvicorn simulator.web.server:app --host 0.0.0.0 --port 8000
 # open http://localhost:8000
 ```
-Open http://localhost:8000
 
-## Scenario format (YAML)
-
-Nested format supported:
+## Scenario format (nested)
 
 ```yaml
 name: baseline
-start_time: "2025-01-01T00:00:00"
 simulation:
   duration_hours: 72
-  timestep_seconds: 60
-  initial_indoor_temp: 19
+  step_seconds: 60
 building:
-  heat_capacity: 30000000
-  heat_loss_coefficient: 200
+  initial_indoor_temp: 19
+  thermal_mass: 30000000
+  heat_loss: 200
 heating:
   max_power_kw: 12
 weather:
+  outdoor_temp: 5
   outdoor_base_c: 5
   outdoor_amplitude_c: 4
 thermostat:
-  target_temperature: 21
+  target_temp: 21
+  hysteresis: 0.2
 gains:
   solar_gain_kw: 0.0
   internal_heat_gain_kw: 0.5
 ```
 
-Flat legacy scenarios remain supported.
+Legacy flat scenarios are still accepted by the loader.
 
 ## Project layout
 
 ```text
-analysis/          # CSV recording
-fake_ha/           # Fake Home Assistant primitives
-sim/               # Engine + scenario + metrics
-thermal_model/     # Thermal model adapter interface
-thermostat/        # Thermostat adapter interface
-visualization/     # Graph generation
-web/               # Lightweight web UI
-experiments/       # Experiment entrypoints
+simulator/core/          # engine loop, scheduler, simulation time
+simulator/scenarios/     # schema + YAML normalization/validation
+simulator/thermal/       # weather, heat source, building thermal model
+simulator/adapters/      # thermostat adapter + HA-like stubs
+simulator/metrics/       # timeseries recording + run summary metrics
+simulator/visualization/ # plot generation
+simulator/web/           # FastAPI API + static frontend
 ```
+
+See `ARCHITECTURE.md` for detailed module responsibilities and extension points.

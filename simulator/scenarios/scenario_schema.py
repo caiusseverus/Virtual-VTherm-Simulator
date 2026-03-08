@@ -20,7 +20,9 @@ class BuildingConfig:
 
 @dataclass
 class WeatherConfig:
-    outdoor_temp: float
+    outdoor_temp: float = 5.0
+    outdoor_base_c: float = 5.0
+    outdoor_amplitude_c: float = 0.0
 
 
 @dataclass
@@ -35,6 +37,12 @@ class ThermostatConfig:
 
 
 @dataclass
+class GainsConfig:
+    solar_gain_kw: float = 0.0
+    internal_heat_gain_kw: float = 0.0
+
+
+@dataclass
 class Scenario:
     name: str
     simulation: SimulationConfig
@@ -42,6 +50,7 @@ class Scenario:
     weather: WeatherConfig
     heating: HeatingConfig
     thermostat: ThermostatConfig
+    gains: GainsConfig
 
 
 def scenario_from_dict(raw: dict) -> Scenario:
@@ -53,4 +62,5 @@ def scenario_from_dict(raw: dict) -> Scenario:
         weather=WeatherConfig(**raw["weather"]),
         heating=HeatingConfig(**raw["heating"]),
         thermostat=ThermostatConfig(**raw["thermostat"]),
+        gains=GainsConfig(**raw.get("gains", {})),
     )
