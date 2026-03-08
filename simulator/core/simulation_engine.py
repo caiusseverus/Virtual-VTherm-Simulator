@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from time import perf_counter
 
-from simulator.adapters.ha_runtime import HARuntime
+from simulator.ha_stub import DEFAULT_CLIMATE_ENTITY_ID, HARuntime
 from simulator.adapters.thermostat_adapter import ThermostatAdapter
 from simulator.core.scheduler import Scheduler
 from simulator.core.time_controller import TimeController
@@ -88,6 +88,9 @@ class SimulationEngine:
             self.ha.states.set("sensor.indoor_temperature", round(indoor, 3), {"unit": "°C"})
             self.ha.states.set("sensor.outdoor_temperature", round(outdoor, 3), {"unit": "°C"})
             self.ha.states.set("sensor.heating_output", round(heating_command, 3), {"unit": "ratio"})
+            climate_state = self.ha.states.get(DEFAULT_CLIMATE_ENTITY_ID)
+            if climate_state is not None:
+                self.ha.states.set("sensor.thermostat_state", climate_state.state, dict(climate_state.attributes))
 
             self.metrics.record(
                 time_s=now_s,
