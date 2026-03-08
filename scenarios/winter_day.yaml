@@ -1,0 +1,11 @@
+name: winter_day
+start_time: "2026-01-14T00:00:00"
+duration_hours: 24
+step_seconds: 300
+indoor_initial_c: 18.0
+target_temp_c: 20.0
+outdoor_base_c: 4.0
+outdoor_amplitude_c: 5.0
+thermal_mass_j_per_c: 12000000
+heat_loss_w_per_c: 230
+max_heating_power_w: 5000

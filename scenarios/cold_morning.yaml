@@ -1,0 +1,11 @@
+name: cold_morning
+start_time: "2026-01-14T04:00:00"
+duration_hours: 8
+step_seconds: 60
+indoor_initial_c: 16.5
+target_temp_c: 21.0
+outdoor_base_c: -2.0
+outdoor_amplitude_c: 3.0
+thermal_mass_j_per_c: 9000000
+heat_loss_w_per_c: 260
+max_heating_power_w: 6500
