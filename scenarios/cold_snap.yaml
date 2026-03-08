@@ -1,0 +1,15 @@
+name: cold_snap
+simulation:
+  duration_hours: 24
+  step_seconds: 10
+building:
+  initial_indoor_temp: 17
+  thermal_mass: 180000
+  heat_loss: 260
+weather:
+  outdoor_temp: -2
+heating:
+  max_power_kw: 12
+thermostat:
+  target_temp: 21
+  hysteresis: 0.3

@@ -1,46 +1,37 @@
-# Virtual VTherm Simulator
+# Thermostat Offline Simulator
 
-A lightweight, self-contained thermal simulation sandbox inspired by Home Assistant + Versatile Thermostat style integrations.
+Fast offline simulation framework for testing thermostat control algorithms against a thermal building model without Home Assistant runtime.
 
-## What this provides
+## Features
+- Deterministic virtual-time simulation loop (no sleeps)
+- Thermal building model + heat source + thermostat adapter
+- YAML-driven scenarios
+- CSV metrics and PNG graphs
+- FastAPI web UI to run simulations interactively
+- Pytest coverage for core pieces
 
-- A fake Home Assistant core with:
-  - state machine
-  - event bus
-  - scheduler
-  - base entity class
-- Building and heating plant models.
-- Simulation engine with:
-  - simulation clock
-  - scenario configuration
-  - virtual sensors
-- Analysis tools to:
-  - record timesteps to CSV
-  - generate quick plots from run outputs
-- YAML scenarios you can run immediately.
-
-## Quick start
-
+## Install
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python run_sim.py --scenario scenarios/winter_day.yaml --output output/winter_day.csv --plot
 ```
 
-## Project layout
-
-```text
-fake_ha/         # Fake Home Assistant runtime primitives
-models/          # Physical models (building + heating plant)
-sim/             # Simulation engine and helpers
-analysis/        # Recording and graphing tools
-integrations/    # Integration loader utilities
-scenarios/       # YAML scenarios
-run_sim.py       # Main CLI entrypoint
+## CLI usage
+```bash
+python run_simulation.py scenarios/winter_test.yaml
 ```
 
-## Notes
+## Web UI
+```bash
+python -m uvicorn simulator.web.server:app --reload
+```
+Open http://localhost:8000
 
-- The simulator intentionally uses simple first-order dynamics for readability.
-- All modules are importable and intentionally implemented (no placeholders).
+## API
+- `GET /scenarios`
+- `POST /simulate`
+- `GET /results/{id}`
+
+## Performance target
+Default scenario (`48h`, `10s` step) is designed to run far faster than real-time (typically >100x speedup on modern CPUs).
