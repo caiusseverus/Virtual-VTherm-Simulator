@@ -18,3 +18,14 @@ def test_simulation_loop_supports_variable_weather_profile() -> None:
     result = engine.run()
     df = result.metrics.to_dataframe()
     assert max(df["outdoor_temperature"]) > min(df["outdoor_temperature"])
+
+
+def test_simulation_updates_ha_state_machine() -> None:
+    scenario = load_scenario("scenarios/cold_snap.yaml")
+    engine = SimulationEngine(scenario)
+    engine.run()
+
+    assert engine.ha.states.get("sensor.indoor_temperature") is not None
+    assert engine.ha.states.get("sensor.outdoor_temperature") is not None
+    assert engine.ha.states.get("sensor.heating_output") is not None
+    assert engine.ha.states.get("sensor.thermostat_state") is not None

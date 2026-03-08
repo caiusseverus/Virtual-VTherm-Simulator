@@ -8,7 +8,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-from simulator.adapters.ha_runtime import HARuntime
+from simulator.ha_stub import DEFAULT_CLIMATE_ENTITY_ID, HARuntime, register_climate_services
 
 
 @dataclass
@@ -72,11 +72,10 @@ class ThermostatAdapter:
     integration_module_path: str | None = None
     integration_revision: str | None = None
     ha_runtime: HARuntime | None = None
-    climate_entity_id: str = "climate.simulated_thermostat"
+    climate_entity_id: str = DEFAULT_CLIMATE_ENTITY_ID
 
     def __post_init__(self) -> None:
         self.ha = self.ha_runtime or HARuntime()
-        self._heating_command = 0.0
         self._setup_ha_compatibility()
 
         if self.mode == "mock_thermostat":
@@ -91,38 +90,12 @@ class ThermostatAdapter:
         self._compat = HACompatibilityWrapper(self._controller)
 
     def _setup_ha_compatibility(self) -> None:
-        self.ha.states.set(
-            self.climate_entity_id,
-            "off",
-            {
-                "temperature": self.target_temperature,
-                "hvac_mode": "off",
-                "source": self.mode,
-            },
+        register_climate_services(
+            self.ha,
+            climate_entity_id=self.climate_entity_id,
+            initial_temperature=self.target_temperature,
+            source=self.mode,
         )
-
-        def set_temperature(data: dict[str, Any]) -> None:
-            entity_id = data.get("entity_id", self.climate_entity_id)
-            state = self.ha.states.get(entity_id)
-            if state is None:
-                return
-            temperature = float(data["temperature"])
-            attrs = dict(state.attributes)
-            attrs["temperature"] = temperature
-            self.ha.states.set(entity_id, state.state, attrs)
-
-        def set_hvac_mode(data: dict[str, Any]) -> None:
-            entity_id = data.get("entity_id", self.climate_entity_id)
-            state = self.ha.states.get(entity_id)
-            if state is None:
-                return
-            hvac_mode = str(data.get("hvac_mode", "off"))
-            attrs = dict(state.attributes)
-            attrs["hvac_mode"] = hvac_mode
-            self.ha.states.set(entity_id, hvac_mode, attrs)
-
-        self.ha.services.register("climate", "set_temperature", set_temperature)
-        self.ha.services.register("climate", "set_hvac_mode", set_hvac_mode)
 
     def _load_dynamic_controller(self) -> Any:
         if not self.integration_module_path:
@@ -190,16 +163,15 @@ class ThermostatAdapter:
             }
             command = self._compat.compute_heating_command(payload)
 
-        self._heating_command = command
         self.ha.states.set("sensor.heating_output", round(command, 3), {"unit": "ratio"})
         self.ha.services.call(
             "climate",
-            "set_hvac_mode",
+            "turn_on" if command > 0.0 else "turn_off",
             {
                 "entity_id": self.climate_entity_id,
-                "hvac_mode": "heat" if command > 0.0 else "off",
             },
         )
 
     def get_heating_command(self) -> float:
-        return self._heating_command
+        heating_state = self.ha.states.get("sensor.heating_output")
+        return float(heating_state.state) if heating_state is not None else 0.0
